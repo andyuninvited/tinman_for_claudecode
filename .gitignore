@@ -1,0 +1,29 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# TinMan runtime files (user-specific, not committed)
+tinman.json
+HEARTBEAT.md
+.env
+
+# Logs
+*.log
+~/.tinman/
+
+# Python venvs
+.venv/
+venv/
+env/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
