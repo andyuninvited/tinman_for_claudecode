@@ -192,7 +192,6 @@ examples:
 
     # Apply CLI preset override
     if hasattr(args, "preset") and args.preset:
-        from .config import PRESETS
         config = TinManConfig.from_dict({**PRESETS[args.preset], "preset": args.preset})
 
     dispatch = {
