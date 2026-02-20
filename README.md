@@ -219,7 +219,9 @@ pytest tests/ -v
 
 ## License
 
-MIT — do whatever you want, just don't ship notify-only mode as your launch pad for autonomous chaos without telling your users.
+GNU GPLv3 — copy-left, and let's evolve together.
+
+See [LICENSE](LICENSE) for the full text.
 
 ---
 
