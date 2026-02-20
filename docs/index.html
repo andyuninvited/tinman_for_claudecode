@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TinMan + C3Poh — Heartbeat & Telegram for Claude Code</title>
+  <meta name="description" content="Give your Claude Code agent a heartbeat and a voice. TinMan adds scheduled health checks. C3Poh adds Telegram messaging. Open source, zero dependencies, 5-minute setup." />
+  <meta property="og:title" content="TinMan + C3Poh — Heartbeat & Telegram for Claude Code" />
+  <meta property="og:description" content="Give your Claude Code agent a heartbeat and a voice. Open source, zero dependencies, 5-minute setup." />
+  <meta property="og:type" content="website" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent-red: #ff6b6b;
+      --accent-blue: #58a6ff;
+      --accent-green: #3fb950;
+      --accent-yellow: #d29922;
+      --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a { color: var(--accent-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Nav ── */
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+    }
+    .nav-brand { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+    .nav-links { display: flex; gap: 1.5rem; font-size: 0.9rem; }
+    .nav-links a { color: var(--muted); }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 5rem 2rem 4rem;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .hero-emoji { font-size: 3.5rem; display: block; margin-bottom: 1rem; }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 span { color: var(--accent-red); }
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 2rem;
+    }
+    .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      padding: 0.65rem 1.4rem;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; text-decoration: none; }
+    .btn-primary { background: var(--accent-blue); color: #000; }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+
+    /* ── Terminal demo ── */
+    .terminal-wrap {
+      max-width: 680px;
+      margin: 0 auto 5rem;
+      padding: 0 2rem;
+    }
+    .terminal {
+      background: #010409;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .terminal-bar {
+      background: var(--surface);
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-red { background: #ff5f57; }
+    .dot-yellow { background: #febc2e; }
+    .dot-green { background: #28c840; }
+    .terminal-title { color: var(--muted); font-size: 0.8rem; margin-left: 0.5rem; }
+    .terminal-body { padding: 1.25rem 1.5rem; line-height: 1.8; }
+    .t-prompt { color: var(--accent-green); }
+    .t-cmd { color: var(--text); }
+    .t-out { color: var(--muted); }
+    .t-ok { color: var(--accent-green); font-weight: 700; }
+    .t-alert { color: var(--accent-yellow); }
+    .t-comment { color: #3d4b5a; }
+
+    /* ── Split feature cards ── */
+    .features {
+      max-width: 1000px;
+      margin: 0 auto 5rem;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 640px) { .features { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.75rem;
+    }
+    .card-icon { font-size: 2rem; margin-bottom: 0.75rem; display: block; }
+    .card h2 { font-size: 1.3rem; margin-bottom: 0.5rem; }
+    .card p { color: var(--muted); font-size: 0.95rem; margin-bottom: 1.25rem; }
+    .card ul { list-style: none; color: var(--muted); font-size: 0.9rem; }
+    .card ul li { padding: 0.25rem 0; }
+    .card ul li::before { content: '→ '; color: var(--accent-blue); }
+    .card-footer { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .install-cmd {
+      background: #010409;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem 0.85rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent-green);
+      display: block;
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── Presets ── */
+    .presets {
+      max-width: 760px;
+      margin: 0 auto 5rem;
+      padding: 0 2rem;
+    }
+    .presets h2 { font-size: 1.6rem; margin-bottom: 0.5rem; text-align: center; }
+    .presets .sub { text-align: center; color: var(--muted); margin-bottom: 2rem; }
+    .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    @media (max-width: 560px) { .preset-grid { grid-template-columns: 1fr; } }
+    .preset {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .preset.recommended { border-color: var(--accent-green); }
+    .preset-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .preset-interval { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; }
+    .preset-desc { font-size: 0.85rem; color: var(--muted); }
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+      margin-bottom: 0.5rem;
+    }
+    .badge-green { background: rgba(63,185,80,0.15); color: var(--accent-green); }
+    .badge-yellow { background: rgba(210,153,34,0.15); color: var(--accent-yellow); }
+    .badge-red { background: rgba(255,107,107,0.15); color: var(--accent-red); }
+
+    /* ── How it works ── */
+    .how {
+      max-width: 760px;
+      margin: 0 auto 5rem;
+      padding: 0 2rem;
+      text-align: center;
+    }
+    .how h2 { font-size: 1.6rem; margin-bottom: 0.5rem; }
+    .how .sub { color: var(--muted); margin-bottom: 2.5rem; }
+    .flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .flow-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+    .flow-arrow { color: var(--muted); font-size: 1.2rem; }
+
+    /* ── CTA ── */
+    .cta {
+      text-align: center;
+      padding: 4rem 2rem 6rem;
+      border-top: 1px solid var(--border);
+    }
+    .cta h2 { font-size: 1.8rem; margin-bottom: 0.75rem; }
+    .cta p { color: var(--muted); margin-bottom: 2rem; }
+    .cta-links { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; font-size: 0.9rem; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand">🤖❤️ TinMan + C3Poh</span>
+  <div class="nav-links">
+    <a href="https://github.com/andyuninvited/tinman_for_claudecode">TinMan</a>
+    <a href="https://github.com/andyuninvited/c3poh_for_claudecode">C3Poh</a>
+    <a href="https://github.com/andyuninvited/heartbeat-templates">Templates</a>
+    <a href="https://t.me/tinmanc3poh">Community</a>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <span class="hero-emoji">🤖❤️📡</span>
+  <h1>Give Claude Code a <span>heartbeat</span><br>and a voice</h1>
+  <p>Claude Code goes silent between sessions. TinMan checks in on a schedule. C3Poh forwards alerts to your phone. Open source, zero dependencies, working in 5 minutes.</p>
+  <div class="hero-buttons">
+    <a class="btn btn-primary" href="https://github.com/andyuninvited/tinman_for_claudecode">⭐ TinMan on GitHub</a>
+    <a class="btn btn-secondary" href="https://github.com/andyuninvited/c3poh_for_claudecode">📡 C3Poh on GitHub</a>
+  </div>
+</section>
+
+<!-- ── Terminal demo ── -->
+<div class="terminal-wrap">
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+      <span class="terminal-title">bash — tinman</span>
+    </div>
+    <div class="terminal-body">
+      <div><span class="t-comment"># Install</span></div>
+      <div><span class="t-prompt">$ </span><span class="t-cmd">pip install tinman-for-claudecode c3poh-for-claudecode</span></div>
+      <br>
+      <div><span class="t-comment"># Interactive setup (picks preset, installs scheduler)</span></div>
+      <div><span class="t-prompt">$ </span><span class="t-cmd">tinman init</span></div>
+      <div><span class="t-out">  Preset: sane (notify-only, 30 min)</span></div>
+      <div><span class="t-out">  Heartbeat checklist: ./HEARTBEAT.md ✓</span></div>
+      <div><span class="t-out">  Scheduler: launchd installed ✓</span></div>
+      <br>
+      <div><span class="t-comment"># First beat, right now</span></div>
+      <div><span class="t-prompt">$ </span><span class="t-cmd">tinman run --once</span></div>
+      <br>
+      <div><span class="t-out">[TinMan] ✓ 2025-01-15T09:30:00Z  (18.3s)</span></div>
+      <div><span class="t-ok">HEARTBEAT_OK</span></div>
+      <br>
+      <div><span class="t-comment"># 30 min later — disk alert forwarded to Telegram</span></div>
+      <div><span class="t-alert">[TinMan] ⚠ 2025-01-15T10:00:00Z</span></div>
+      <div><span class="t-out">- Disk space: 4.2 GB free (below 5 GB threshold)</span></div>
+      <div><span class="t-out">- Recommended: clear ~/Downloads or build artifacts</span></div>
+      <div><span class="t-out">→ Forwarded to Telegram via C3Poh ✓</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Feature cards ── -->
+<section class="features">
+  <div class="card">
+    <span class="card-icon">🤖❤️</span>
+    <h2>TinMan</h2>
+    <p>Scheduled heartbeat for Claude Code. Runs your HEARTBEAT.md checklist through Claude on a timer and tells you when something needs attention.</p>
+    <ul>
+      <li>Plain-English HEARTBEAT.md checklist</li>
+      <li>macOS launchd + Linux cron</li>
+      <li>Notify-only by default</li>
+      <li>sane / paranoid / chaos presets</li>
+      <li>Logs every beat, rotates automatically</li>
+      <li>Zero external dependencies</li>
+    </ul>
+    <div class="card-footer">
+      <code class="install-cmd">pip install tinman-for-claudecode</code>
+      <a href="https://github.com/andyuninvited/tinman_for_claudecode">GitHub →</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-icon">📡🤖</span>
+    <h2>C3Poh</h2>
+    <p>Telegram bridge for Claude Code. DM your agent from anywhere, get answers back. Heartbeat alerts from TinMan land on your phone automatically.</p>
+    <ul>
+      <li>Long-polling (no inbound ports needed)</li>
+      <li>Allowlist-only DM policy by default</li>
+      <li>Token never written to disk</li>
+      <li>Local notify server for TinMan</li>
+      <li>Group chat support with @mention</li>
+      <li>Zero external dependencies</li>
+    </ul>
+    <div class="card-footer">
+      <code class="install-cmd">pip install c3poh-for-claudecode</code>
+      <a href="https://github.com/andyuninvited/c3poh_for_claudecode">GitHub →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Presets ── -->
+<section class="presets">
+  <h2>Security presets</h2>
+  <p class="sub">Pick the one that matches your comfort level. You can always change it.</p>
+  <div class="preset-grid">
+    <div class="preset recommended">
+      <div class="badge badge-green">RECOMMENDED</div>
+      <div class="preset-name">sane</div>
+      <div class="preset-interval">every 30 min</div>
+      <div class="preset-desc">Notify-only. Claude reports, never acts. Best for most people.</div>
+    </div>
+    <div class="preset">
+      <div class="badge badge-yellow">TIGHTER</div>
+      <div class="preset-name">paranoid</div>
+      <div class="preset-interval">every 15 min</div>
+      <div class="preset-desc">Notify-only, more frequent, max logging. For high-stakes projects.</div>
+    </div>
+    <div class="preset">
+      <div class="badge badge-red">⚠ ACTIVE</div>
+      <div class="preset-name">chaos</div>
+      <div class="preset-interval">every 5 min</div>
+      <div class="preset-desc">Claude can take actions. You've been warned. You have to opt in explicitly.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── How it works ── -->
+<section class="how">
+  <h2>How the full stack works</h2>
+  <p class="sub">TinMan and C3Poh are independent tools that pair together seamlessly.</p>
+  <div class="flow">
+    <div class="flow-step">launchd / cron</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">tinman run</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">HEARTBEAT.md</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">claude --print</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">C3Poh notify</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">📱 Telegram</div>
+  </div>
+  <br>
+  <div class="flow">
+    <div class="flow-step">📱 You DM bot</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">C3Poh receives</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">claude --print</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">📱 Claude replies</div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta">
+  <h2>Start in 5 minutes</h2>
+  <p>Both tools. Zero dependencies. Interactive setup. Works on macOS and Linux.</p>
+  <div class="hero-buttons" style="margin-bottom:2rem">
+    <a class="btn btn-primary" href="https://github.com/andyuninvited/tinman_for_claudecode">Get TinMan</a>
+    <a class="btn btn-secondary" href="https://github.com/andyuninvited/c3poh_for_claudecode">Get C3Poh</a>
+  </div>
+  <div class="cta-links">
+    <a href="https://github.com/andyuninvited/heartbeat-templates">📋 HEARTBEAT.md templates</a>
+    <a href="https://t.me/tinmanc3poh">💬 Telegram community</a>
+    <a href="https://news.ycombinator.com/item?id=47090539">🟠 HN discussion</a>
+  </div>
+</section>
+
+<footer>
+  Built by <a href="https://github.com/andyuninvited">@andyuninvited</a> · MIT License ·
+  <a href="https://github.com/andyuninvited/tinman_for_claudecode">TinMan</a> ·
+  <a href="https://github.com/andyuninvited/c3poh_for_claudecode">C3Poh</a>
+</footer>
+
+</body>
+</html>
