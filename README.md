@@ -1,4 +1,8 @@
-# 🤖❤️ TinMan — Heartbeat for Claude Code
+# TinMan — Heartbeat for Claude Code
+
+[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://python.org)
+[![License](https://img.shields.io/badge/License-GPLv3-green.svg)](LICENSE)
+[![Claude Code](https://img.shields.io/badge/Built%20for-Claude%20Code-orange.svg)](https://claude.ai/code)
 
 > *"If I only had a heart…"*
 > The Tin Man wanted a heart. Now Claude Code has one.
@@ -7,17 +11,19 @@
 
 Zero external dependencies. Works on macOS and Linux. Takes 2 minutes to set up.
 
+<!-- TODO: Add demo GIF here showing tinman init + a heartbeat notification -->
+
 ---
 
-## Why this exists
+## Why I Built This
 
-OpenClaw ships a built-in `heartbeat` feature that lets an AI agent proactively check in with you on a schedule. Claude Code doesn't have that — it waits for you to initiate.
+I'm a PM who spends all day in Claude Code. I kept forgetting to check things: uncommitted work piling up, tests I meant to run, branches I never cleaned up.
 
-TinMan fills that gap. It's a lightweight scheduler that:
-1. Runs your **HEARTBEAT.md** checklist through Claude Code on a timer
-2. Prints (or forwards) the result
-3. Logs everything
-4. Stays safely in **notify-only mode** by default — Claude tells you what's wrong, it doesn't fix things without asking
+OpenClaw has a built-in heartbeat feature where the agent proactively checks in. Claude Code doesn't — it waits for you to ask.
+
+So I built TinMan. It's the simplest thing that could work: a scheduler that runs your checklist through Claude on a timer and tells you what needs attention. No servers, no Docker, no accounts to create. Just Claude plus a scheduler.
+
+The philosophy is **notify, don't act**. Claude tells you what's wrong. You decide what to do about it. That's the "sane" default. If you trust Claude to fix things autonomously, there's a "chaos" mode — but you have to opt in.
 
 ---
 
@@ -38,6 +44,13 @@ pip install tinman-for-claudecode
 - [Claude Code](https://claude.ai/code) (`claude` CLI in your PATH)
 - macOS or Linux
 
+**Verify installation:**
+```bash
+tinman --version
+which tinman
+claude --version  # Make sure Claude Code is also installed
+```
+
 ---
 
 ## Quick start
@@ -50,6 +63,12 @@ That's it. TinMan will:
 - Create a `HEARTBEAT.md` checklist in your project (edit it to customize)
 - Install a background scheduler (launchd on macOS, cron on Linux)
 - Run the first heartbeat immediately
+
+**Test that it's working:**
+```bash
+tinman status      # See scheduler status and last heartbeat result
+tinman logs        # View recent heartbeat history
+```
 
 ---
 
@@ -77,15 +96,15 @@ TinMan ships with three modes. Pick the one that matches your comfort level.
 |--------|----------|------|----------|
 | `sane` | 30 min | notify-only | **default** — Claude tells, never acts |
 | `paranoid` | 15 min | notify-only | Extra visibility, max logging |
-| `chaos` | 5 min | active | You trust Claude to take action. You've been warned ⚠️ |
+| `chaos` | 5 min | active | You trust Claude to take action |
 
 ```bash
 tinman install --preset sane       # recommended for most people
 tinman install --preset paranoid   # tighter, more frequent
-tinman install --preset chaos      # Claude can act autonomously
+tinman install --preset chaos      # Claude can act autonomously ⚠️
 ```
 
-> **OpenClaw users:** The default `sane` preset matches the OpenClaw pattern of `showOk: false, showAlerts: true`. TinMan is `notify-only` by default — OpenClaw users often get burned by leaving defaults that allow autonomous actions. Don't be that person.
+> **Note:** The default `sane` preset matches the OpenClaw pattern of `showOk: false, showAlerts: true`. TinMan is `notify-only` by default.
 
 ---
 
@@ -112,6 +131,8 @@ Never take irreversible steps without asking me first.
 - No secret exfiltration
 - No git commits/pushes without confirmation
 - No software installs without confirmation
+
+Want more templates? Check out [heartbeat-templates](https://github.com/andyuninvited/heartbeat-templates) for ready-to-use checklists.
 
 ---
 
@@ -154,6 +175,17 @@ Want TinMan to send heartbeat alerts to your **Telegram** (or Slack/Discord)? Pa
 
 TinMan → C3Poh → your phone. Done.
 
+**The full stack:**
+```
+[launchd/cron] → TinMan heartbeat
+                      ↓
+              Claude Code analysis
+                      ↓
+              C3Poh notification
+                      ↓
+              Your phone (Telegram)
+```
+
 ---
 
 ## How it works
@@ -186,7 +218,7 @@ You could! TinMan adds:
 - **Log rotation** — keeps log files sane
 - **C3Poh integration** — forwards alerts to messaging
 - **Status command** — `tinman status` shows you exactly what's running and last N results
-- **Empty HEARTBEAT.md detection** — matches OpenClaw behavior, avoids wasted API calls
+- **Empty HEARTBEAT.md detection** — avoids wasted API calls
 
 ---
 
@@ -212,8 +244,9 @@ pytest tests/ -v
 ## Related
 
 - [C3Poh](https://github.com/andyuninvited/c3poh_for_claudecode) — Telegram/Slack/Discord bridge for Claude Code (the comms to TinMan's heart)
+- [Heartbeat Templates](https://github.com/andyuninvited/heartbeat-templates) — Ready-to-use HEARTBEAT.md files for different workflows
+- [Agent Blueprints](https://github.com/andyuninvited/agent-blueprints) — Starter templates for building AI agents
 - [Claude Code](https://claude.ai/code) — the agentic CLI this is built for
-- [OpenClaw](https://openclaw.ai) — the inspiration (heartbeat + messaging for a different runtime)
 
 ---
 
