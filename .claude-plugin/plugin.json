@@ -1,0 +1,13 @@
+{
+  "name": "tinman",
+  "description": "Scheduled heartbeat monitoring for Claude Code. Runs a customizable HEARTBEAT.md checklist on a timer, logs results, and optionally forwards alerts to Telegram via C3Poh. Notify-only by default.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Andy Rosic",
+    "url": "https://github.com/andyuninvited"
+  },
+  "homepage": "https://andyuninvited.github.io/tinman_for_claudecode/",
+  "repository": "https://github.com/andyuninvited/tinman_for_claudecode",
+  "license": "GPL-3.0",
+  "keywords": ["heartbeat", "monitoring", "scheduler", "health-check", "automation"]
+}
