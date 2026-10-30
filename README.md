@@ -252,9 +252,9 @@ pytest tests/ -v
 
 ## License
 
-GNU GPLv3 — copy-left, and let's evolve together.
+GNU GPLv3. Copy-left, and let's evolve together.
 
-See [LICENSE](LICENSE) for the full text.
+Copyright (C) 2025 Andy Rosic (andyuninvited). This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](LICENSE) for the full text.
 
 ---
 
